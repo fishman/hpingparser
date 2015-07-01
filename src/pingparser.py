@@ -28,25 +28,23 @@ def parse(ping_output):
         `avgping`: *float*; the average round trip ping time in milliseconds
         `maxping`: *float*; the maximum (slowest) round trip ping time in
                     milliseconds
-        `jitter`: *float*; the standard deviation between round trip ping times
-                    in milliseconds
     """
-    matcher = re.compile(r'PING ([a-zA-Z0-9.\-]+) \(')
+    matcher = re.compile(r'HPING ([a-zA-Z0-9.\-]+) \(')
     host = _get_match_groups(ping_output, matcher)[0]
 
-    matcher = re.compile(r'(\d+) packets transmitted, (\d+) received')
-    sent, received = _get_match_groups(ping_output, matcher)
+    matcher = re.compile(r'(\d+) packets transmitted, (\d+) packets received, (\d+)% packet loss')
+    sent, received, loss = _get_match_groups(ping_output, matcher)
 
     try:
-        matcher = re.compile(r'(\d+.\d+)/(\d+.\d+)/(\d+.\d+)/(\d+.\d+)')
-        minping, avgping, maxping, jitter = _get_match_groups(ping_output,
+        matcher = re.compile(r'(\d+.\d+)/(\d+.\d+)/(\d+.\d+)')
+        minping, avgping, maxping = _get_match_groups(ping_output,
                                                               matcher)
     except:
-        minping, avgping, maxping, jitter = ['NaN']*4
+        minping, avgping, maxping = ['NaN']*3
 
     return {'host': host, 'sent': sent, 'received': received,
             'minping': minping, 'avgping': avgping, 'maxping': maxping,
-            'jitter': jitter}
+            'packetloss': loss}
 
 
 def main(argv=sys.argv):
@@ -67,7 +65,7 @@ def main(argv=sys.argv):
     \t%m    minimum ping in milliseconds
     \t%a    average ping in milliseconds
     \t%M    maximum ping in milliseconds
-    \t%j    jitter in milliseconds
+    \t%l    packet loss
 
     Default FORMAT is %h,%s,%r,%m,%a,%M,%j""")
     parser.add_option_group(format_group)
@@ -86,7 +84,7 @@ def main(argv=sys.argv):
                            ('%m', 'minping'),
                            ('%a', 'avgping'),
                            ('%M', 'maxping'),
-                           ('%j', 'jitter')]
+                           ('%l', 'packetloss')]
     format_replacements = [(fmt, ping_result[field]) for fmt, field in
                            format_replacements]
 
