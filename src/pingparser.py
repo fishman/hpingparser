@@ -32,7 +32,7 @@ def parse(ping_output):
     matcher = re.compile(r'HPING ([a-zA-Z0-9.\-]+) \(')
     host = _get_match_groups(ping_output, matcher)[0]
 
-    matcher = re.compile(r'(\d+) packets transmitted, (\d+) packets received, (\d+)% packet loss')
+    matcher = re.compile(r'(\d+) packets tra(?:ns)?mitted, (\d+) packets received, ([-\d]+)% packet loss')
     sent, received, loss = _get_match_groups(ping_output, matcher)
 
     try:
